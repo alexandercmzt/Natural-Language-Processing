@@ -4,6 +4,7 @@ import nltk
 from nltk.tag import hmm
 from nltk.probability import LaplaceProbDist
 
+#this is for parsing arguments.
 parser = argparse.ArgumentParser(description="Deciphering")
 parser.add_argument('-laplace', dest='laplace', action='store_true')
 parser.add_argument('-lm', dest='lm', action='store_true')
@@ -11,7 +12,7 @@ parser.add_argument(dest='folder', type=str, default = None)
 parser.set_defaults(laplace=False, lm=False)
 args = parser.parse_args()
 
-#load train data
+#this loads the training data into lists.
 train_cipher = open(args.folder + "/train_cipher.txt")
 train_plain = open(args.folder + "/train_plain.txt")
 train_letters = re.split(r'[\n\r]+' , train_cipher.read())
@@ -29,18 +30,18 @@ else:
 			tmp.append((train_letters[i][j], train_tags[i][j]))
 		train_data.append(tmp)
 if args.lm:
-	#if using the tac text, we need to add it as well
+	#this loads the language model as hidden state transitions.
 	tac_file = open(args.folder + "/../tac-data.txt")
 	tac_sentences = re.split(r'[\n\r]+' , tac_file.read())
 	tac_file.close()
 	for i in xrange(len(tac_sentences)):
 		tmp = []
 		for j in xrange(len(tac_sentences[i])):
-			#we are only adding the tag, no emissions in this case
+			#we are only adding the state transitions, no emissions in this case
 			tmp.append((None,tac_sentences[i][j]))
 		train_data.append(tmp)
 
-#load test data
+#this loads the testing data into lists
 test_cipher = open(args.folder + "/test_cipher.txt")
 test_plain = open(args.folder + "/test_plain.txt")
 test_letters = re.split(r'[\n\r]+' , test_cipher.read())
@@ -55,7 +56,7 @@ for i in xrange(len(test_letters)):
 		test_data.append(tmp)
 
 
-#train hmm
+#this trains the hmm
 if args.laplace:
 	trainer = hmm.HiddenMarkovModelTrainer()
 	tagger = trainer.train_supervised(train_data, LaplaceProbDist)
@@ -64,12 +65,7 @@ else:
 	tagger = trainer.train_supervised(train_data)
 
 
-# print train_letters[0]
-# print ''.join([x[1] for x in tagger.tag(train_letters[0])])
-# raw_input()
-
-
-#get output and score
+#this gets the output and score
 output_lines = []
 gold_tags = []
 for i in xrange(len(test_letters)):
